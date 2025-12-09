@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class AgentCharacterController : Controller
+public class AgentCharacterController : Controller, ITransformPosition
 {
     public const int LeftMouseButton = 0;
 
@@ -14,7 +14,7 @@ public class AgentCharacterController : Controller
 
     private NavMeshPath _pathToTarget = new NavMeshPath();
 
-    public Vector3 Target => _target;
+    public Vector3 Position => _target;
 
     public AgentCharacterController(AgentCharacter character, float minDistanceToTarget)
     {

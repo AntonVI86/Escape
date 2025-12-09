@@ -5,12 +5,12 @@ public class PointToMoveDisplayer : MonoBehaviour
     [SerializeField] private InputPlayer _input;
     [SerializeField] private GameObject _flag;
 
-    private AgentCharacterController _controller => _input.AgentController as AgentCharacterController;
+    private ITransformPosition _positionSender => _input.AgentController as ITransformPosition;
     public void Show()
     {
-        if(_input.AgentController is AgentCharacterController)
+        if(_input.AgentController is ITransformPosition)
         {
-            _flag.transform.position = _controller.Target;
+            _flag.transform.position = _positionSender.Position;
             _flag.SetActive(true);
         }
     }
