@@ -12,6 +12,7 @@ public class AgentCharacterView : MonoBehaviour
 
     [SerializeField] private Animator _animator;
     [SerializeField] private AgentCharacter _character;
+    [SerializeField] private PointToMoveDisplayer _pointDisplayer;
 
     private void OnEnable()
     {
@@ -30,22 +31,22 @@ public class AgentCharacterView : MonoBehaviour
     private void StartRunning()
     {
         _animator.SetBool(IsRunningKey, true);
+        _pointDisplayer.Show();
     }
 
     private void StopRunning()
     {
         _animator.SetBool(IsRunningKey, false);
+        _pointDisplayer.Hide();
     }
 
     private void OnHealthValueChanged()
     {
         _animator.SetTrigger(HitKey);
-        _character.SetIndexedSpeed(IndexOfSpeed.Hitted);
 
         if (_character.IsInjured == true)
         {
             _animator.SetLayerWeight(_injureLayerIndex, _injureLayerWeight);
-            _character.SetIndexedSpeed(IndexOfSpeed.Injured);
         }
     }
 

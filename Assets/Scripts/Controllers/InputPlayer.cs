@@ -3,7 +3,6 @@ using UnityEngine;
 public class InputPlayer : MonoBehaviour
 {
     [SerializeField] private AgentCharacter _agentCharacter;
-    [SerializeField] private ParticleSystem _pointView;
 
     private Controller _agentController;
 
@@ -14,10 +13,12 @@ public class InputPlayer : MonoBehaviour
 
     private Timer _timer;
 
+    public Controller AgentController => _agentController;
+
     private void Awake()
     {
         _randomMoveController = new RandomMoveCharacterController(_agentCharacter, _agentCharacter.CurrentPosition);
-        _playerController = new AgentCharacterController(_agentCharacter, _minDistanceToTarget, _pointView);
+        _playerController = new AgentCharacterController(_agentCharacter, _minDistanceToTarget);
 
         _agentController = _playerController;
 

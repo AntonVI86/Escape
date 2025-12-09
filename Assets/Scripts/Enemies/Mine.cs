@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Mine : MonoBehaviour
@@ -5,23 +6,19 @@ public class Mine : MonoBehaviour
     [SerializeField] private ParticleSystem _explosionVfx;
     [SerializeField] private ParticleSystem _burningVfx;
 
-    private AgentCharacter _character;
     private PlayerDetector _detector;
-
-    private float _radiusDetected = 1f;
 
     private float _timeToExplosion = 1f;
     private float _damage = 30f;
 
     private void Awake()
     {
-        _character = GetComponentInParent<CharacterGetter>().Agent;
-        _detector = new PlayerDetector(transform, _character.transform);
+        _detector = new PlayerDetector(transform);
     }
 
     private void Update()
     {
-        if (_detector.IsCharacterInExplosionRange())
+        if (IsDamageablesInRange())
         {
             _burningVfx.Play();
             CountDownToExplosion();            
@@ -43,20 +40,35 @@ public class Mine : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
     private void ProcessExplosion()
     {
-        Collider[] colliders = Physics.OverlapSphere(transform.position, _radiusDetected);
-
-        foreach (Collider collider in colliders)
+        foreach (Collider collider in _detector.GetDamageablesInExplosionRange())
         {
             if (collider.TryGetComponent(out IDamageable damageable))
                 damageable.TakeDamage(_damage);
         }
     }
 
+    private bool IsDamageablesInRange()
+    {
+        List<IDamageable> damageables = new List<IDamageable>();
+
+        foreach (Collider collider in _detector.GetDamageablesInExplosionRange())
+        {
+            if (collider.TryGetComponent(out IDamageable damageable))
+                damageables.Add(damageable);
+        }
+
+        return damageables.Count > 0;
+    }
+
     private void OnDrawGizmos()
     {
+        if (Application.isEditor == true)
+            return;
+
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, _radiusDetected);
+        Gizmos.DrawWireSphere(transform.position, _detector.ExplosionRange);
     }
 }

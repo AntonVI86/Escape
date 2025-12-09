@@ -71,5 +71,15 @@ public class AgentCharacter : MonoBehaviour, IDamageable
             
             Died?.Invoke();
         }
+
+        ChangeSpeed();
+    }
+
+    private void ChangeSpeed()
+    {
+        SetIndexedSpeed(IndexOfSpeed.Hitted);
+
+        if (_currentHealth <= _healthToInjured)
+            SetIndexedSpeed(IndexOfSpeed.Injured);
     }
 }

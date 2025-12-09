@@ -3,21 +3,23 @@ using UnityEngine;
 public class PlayerDetector
 {
     private Transform _sourceTransform;
-    private Transform _characterTransform;
 
     private float _explosionRange = 2f;
 
-    public PlayerDetector(Transform source, Transform character)
+    public float ExplosionRange => _explosionRange;
+
+    public PlayerDetector(Transform source)
     {
         _sourceTransform = source;
-        _characterTransform = character;
     }
 
-    public bool IsCharacterInExplosionRange()
+    public Collider[] GetDamageablesInExplosionRange()
     {
-        if ((_characterTransform.position - _sourceTransform.position).magnitude < _explosionRange)
-            return true;
+        Collider[] colliders = Physics.OverlapSphere(_sourceTransform.position, _explosionRange);
 
-        return false;
+        if(colliders.Length > 0)
+            return colliders;
+
+        return null;
     }
 }
