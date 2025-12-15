@@ -52,7 +52,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _ColorTime: 0.5
-    - _FadeTime: 1
+    - _FadeTime: 3
     - _Max: 1
     - _Min: 0.5
     - _QueueControl: 0

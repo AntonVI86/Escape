@@ -4,7 +4,7 @@ using UnityEngine;
 public class ItemSpawner : MonoBehaviour
 {
     private float _radiusOfSpawn = 2f;
-    private float _timeToSpawn = 10f;
+    private float _timeToSpawn = 3f;
 
     private float _maxAngle = 360;
 
@@ -14,7 +14,7 @@ public class ItemSpawner : MonoBehaviour
     [SerializeField] private HealthPotion _itemPrefab;
     [SerializeField] private Transform _transform;
 
-    private void Awake() => Launch();
+    public bool IsEnable => _isEnable;
 
     public void Toggle()
     {
@@ -26,7 +26,14 @@ public class ItemSpawner : MonoBehaviour
             Stop();
     }
 
-    private void Launch() => _spawn = StartCoroutine(SpawnProcess());
+    private void Launch()
+    {
+        if (_spawn != null)
+            StopCoroutine(_spawn);
+
+        _spawn = StartCoroutine(SpawnProcess());
+    }
+    
     private void Stop() => StopCoroutine(_spawn);
 
     private Vector3 GetPointToSpawn()
