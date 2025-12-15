@@ -3,6 +3,7 @@ using UnityEngine;
 public class InputPlayer : MonoBehaviour
 {
     [SerializeField] private AgentCharacter _agentCharacter;
+    [SerializeField] private ItemSpawner _itemSpawner;
 
     private Controller _agentController;
 
@@ -12,6 +13,7 @@ public class InputPlayer : MonoBehaviour
     private Controller _playerController;
 
     private Timer _timer;
+    private KeyCode _spawnLauncher = KeyCode.F;
 
     public Controller AgentController => _agentController;
 
@@ -29,6 +31,9 @@ public class InputPlayer : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(_spawnLauncher))
+            _itemSpawner.Toggle();
+
         if (Input.GetMouseButtonDown(0))
         {
             _timer.ResetTimeToChange();

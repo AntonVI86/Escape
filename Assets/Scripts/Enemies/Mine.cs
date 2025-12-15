@@ -1,15 +1,20 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Mine : MonoBehaviour
 {
-    [SerializeField] private ParticleSystem _explosionVfx;
-    [SerializeField] private ParticleSystem _burningVfx;
+    public event Action Detonated;
+    public event Action Activated;
 
     private PlayerDetector _detector;
+    private Coroutine _activateProcess;
 
     private float _timeToExplosion = 1f;
     private float _damage = 30f;
+
+    public float ExplosionRange => _detector.ExplosionRange;
 
     private void Awake()
     {
@@ -20,24 +25,11 @@ public class Mine : MonoBehaviour
     {
         if (IsDamageablesInRange())
         {
-            _burningVfx.Play();
-            CountDownToExplosion();            
-        }
-        else
-        {
-            _burningVfx.Stop();
-        }
-    }
-
-    private void CountDownToExplosion()
-    {
-        _timeToExplosion -= Time.deltaTime;
-
-        if(_timeToExplosion <= 0)
-        {
-            ProcessExplosion();
-            Instantiate(_explosionVfx, transform.position, Quaternion.identity);
-            Destroy(gameObject);
+            if(_activateProcess == null)
+            {
+                _activateProcess = StartCoroutine(CountDownToExplosion());
+                Activated?.Invoke();
+            }
         }
     }
 
@@ -48,9 +40,12 @@ public class Mine : MonoBehaviour
             if (collider.TryGetComponent(out IDamageable damageable))
                 damageable.TakeDamage(_damage);
         }
+
+        Detonated?.Invoke();
+        Destroy(gameObject);
     }
 
-    private bool IsDamageablesInRange()
+    public bool IsDamageablesInRange()
     {
         List<IDamageable> damageables = new List<IDamageable>();
 
@@ -63,12 +58,14 @@ public class Mine : MonoBehaviour
         return damageables.Count > 0;
     }
 
-    private void OnDrawGizmos()
+    private IEnumerator CountDownToExplosion()
     {
-        if (Application.isEditor == true)
-            return;
+        while (_timeToExplosion > 0)
+        {
+            _timeToExplosion -= Time.deltaTime;
+            yield return null;
+        }
 
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, _detector.ExplosionRange);
+        ProcessExplosion();
     }
 }

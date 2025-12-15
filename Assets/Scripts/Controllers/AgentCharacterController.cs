@@ -29,6 +29,17 @@ public class AgentCharacterController : Controller, ITransformPosition
         if (_character.IsAlive == false)
             return;
 
+        if(_character.IsOnNavMeshLink(out OffMeshLinkData offMeshLinkData))
+        {
+            if (_character.InJumpProcess == false)
+            {
+                _character.SetRotationDirection(offMeshLinkData.endPos - offMeshLinkData.startPos);
+                _character.Jump(offMeshLinkData);
+            }
+
+            return;
+        }
+
         if (Input.GetMouseButtonDown(LeftMouseButton))
         {
             _target = _targetGetter.GetPoint();

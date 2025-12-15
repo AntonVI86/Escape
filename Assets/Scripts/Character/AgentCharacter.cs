@@ -2,11 +2,14 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class AgentCharacter : MonoBehaviour, IDamageable
+public class AgentCharacter : MonoBehaviour, IDamageable, IHealable
 {
     private NavMeshAgent _agent;
 
-    public event Action HealthValueChanged;
+    private AgentJumper _jumper;
+
+    public event Action Hited;
+    public event Action Healed;
     public event Action Died;
 
     private AgentMover _mover;
@@ -16,11 +19,14 @@ public class AgentCharacter : MonoBehaviour, IDamageable
 
     private float _healthToInjured = 30;
 
+    [SerializeField] private AnimationCurve _curve;
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _rotationSpeed;
 
-    [SerializeField] private float _maxHealth;
+    [SerializeField] private float _jumpSpeed;
 
+    [SerializeField] private float _maxHealth;
+    [SerializeField] private ParticleSystem _vfx;
     public Vector3 CurrentVelocity => _mover.CurrentVelocity;
     public Vector3 CurrentPosition => transform.position;
     public Quaternion CurrentRotation => _rotator.CurrentRotation;
@@ -30,6 +36,9 @@ public class AgentCharacter : MonoBehaviour, IDamageable
     public bool IsInjured => (_currentHealth / _maxHealth) * 100 <= _healthToInjured;
 
     public bool IsAlive => _currentHealth > 0;
+    public bool InJumpProcess => _jumper.InProcess();
+
+    public ParticleSystem Vfx => _vfx;
 
     private void Awake()
     {
@@ -40,6 +49,7 @@ public class AgentCharacter : MonoBehaviour, IDamageable
 
         _mover = new AgentMover(_agent, _moveSpeed);
         _rotator = new DirectionalRotator(transform, _rotationSpeed);
+        _jumper = new AgentJumper(_jumpSpeed, _agent, this, _curve);
     }
 
     private void Update()
@@ -55,6 +65,20 @@ public class AgentCharacter : MonoBehaviour, IDamageable
     public bool TryGetPath(Vector3 targetPosition, NavMeshPath pathToTarget)
         => NavMeshUtils.TryGetPath(_agent, targetPosition, pathToTarget);
 
+    public bool IsOnNavMeshLink(out OffMeshLinkData offMeshLinkData)
+    {
+        if (_agent.isOnOffMeshLink)
+        {
+            offMeshLinkData = _agent.currentOffMeshLinkData;
+            return true;
+        }
+
+        offMeshLinkData = default(OffMeshLinkData);
+        return false;
+    }
+
+    public void Jump(OffMeshLinkData offMeshLinkData) => _jumper.Jump(offMeshLinkData);
+
     public void TakeDamage(float damage)
     {
         if (damage < 0)
@@ -62,7 +86,7 @@ public class AgentCharacter : MonoBehaviour, IDamageable
 
         _currentHealth -= damage;
         SetDestination(transform.position);
-        HealthValueChanged?.Invoke();
+        Hited?.Invoke();
 
         if(_currentHealth < 0)
         {
@@ -81,5 +105,17 @@ public class AgentCharacter : MonoBehaviour, IDamageable
 
         if (_currentHealth <= _healthToInjured)
             SetIndexedSpeed(IndexOfSpeed.Injured);
+    }
+
+    public void Heal(float value)
+    {
+        if (value < 0)
+            return;
+
+        _currentHealth += value;
+        Healed?.Invoke();
+
+        if (_currentHealth > _maxHealth)
+            _currentHealth = _maxHealth;
     }
 }
